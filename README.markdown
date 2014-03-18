@@ -1,3 +1,7 @@
+# WIP NOTES:
+f5_rule{} now requires a /Folder/ in the rulename as this is enforced on v11+.  Technically it takes an unlabelled one and just applies it to /Common/ by the looks of things and we could mangle to that but it seems safest to just require them.
+
+
 # Puppet Labs F5 module
 Warning: this project is currently work in progress, *pending* sections are planned features.
 
@@ -23,16 +27,16 @@ The following puppet manifest will deploy f5 gem on the f5_proxy system and depl
     node f5_proxy_system {
       include f5
 
-      f5::config { "f5.puppetlabs.lan":
+      f5::config { 'f5.puppetlabs.lan':
         username => 'admin',
         password => 'admin',
         url      => 'f5.puppetlabs.lan',
-        target   => '/etc/puppetlabs/puppet/device/f5.puppetlabs.lan.conf'
+        target   => "${::settings::confdir}/device/f5.puppetlabs.lan.conf"
       }
 
       cron { "bigip":
-        command => 'puppet device --deviceconfig /etc/puppetlabs/puppet/device/f5.puppetlabs.lan.conf',
-        min     => fqdn_rand(60),
+        command => "puppet device --deviceconfig ${::settings::confdir}/device/f5.puppetlabs.lan.conf",
+        minute  => fqdn_rand(60),
       }
     }
 
@@ -251,9 +255,9 @@ See [F5 documentation](http://support.f5.com/kb/en-us/products/big-ip_ltm/manual
     f5_snat { 'nat':
       ensure                  => 'present',
       connection_mirror_state => 'STATE_DISABLED',
-      original_address        => ['0.0.0.0', '0.0.0.0'],
+      original_address        => { original_address => '0.0.0.0', wildmask => '0.0.0.0'},
       source_port_behavior    => 'SOURCE_PORT_PRESERVE',
-      translation_target      => ['SNAT_TYPE_TRANSLATION_ADDRESS', '10.10.10.10'],
+      translation_target      => { type => 'SNAT_TYPE_TRANSLATION_ADDRESS', translation_object => '10.10.10.10'},
       vlan                    => { 'state' => 'STATE_DISABLED',
                                    'vlans' => ['default'] },
     }
@@ -275,6 +279,8 @@ See [F5 documentation](http://support.f5.com/kb/en-us/products/big-ip_ltm/manual
     }
 
 F5_virtualserver does not atomically change rules (F5 API limitation), so to reorder rule priority please use irule priority which can be modified in f5_rule. See [F5 documentation](http://devcentral.f5.com/wiki/iRules.priority.ashx).
+
+NOTE: Currently requires VLANs to be made manually.
 
     f5_virtualserver { 'www':
       ensure                  => 'present',
@@ -449,20 +455,21 @@ F5_snmpconfiguration configures the SNMP agent
     ],
   }
 
+F5 routes:
 
+  This resource manages 'static' F5 routes, not management routes.
+  Notes:  allows pool, vlan, gateway. If gateway is ipv6, need vlan too.  If pool
+can't have gateway or vlan.  Can do just vlan, no gateway.  TODO: work with lauren
+on this.
 
-F5 routetable manages 'static' and 'management' routing tables.
-
-    f5_routetable { 'static':
-      table => [
-        { destination => '0.0.0.0',
-          netmask     => '0.0.0.0',
-          gateway     => '10.0.0.1',
-          mtu         => 1500 },
-      ]
-    }
-
-
+  f5_route { '/Common/test':
+    ensure      => 'present',
+    description => 'Test route',
+    destination => '10.0.2.0',
+    gateway     => 'reject',
+    mtu         => '10',
+    netmask     => '255.255.255.0',
+  }
 
 F5 user resource notes :
 
