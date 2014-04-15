@@ -2,20 +2,7 @@ Puppet::Type.newtype(:f5_profileclientssl) do
   @doc = "Manage F5 Client SSL profiles."
 
   apply_to_device
-
-  ensurable do
-    desc "Add or delete Client SSL profile."
-
-    defaultto(:present)
-
-    newvalue(:present) do
-      provider.create
-    end
-
-    newvalue(:absent) do
-      provider.destroy
-    end
-  end
+  ensurable
 
   newparam(:name, :namevar=>true) do
     desc "The Client SSL profile name."

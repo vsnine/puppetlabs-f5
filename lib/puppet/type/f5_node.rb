@@ -3,19 +3,7 @@ Puppet::Type.newtype(:f5_node) do
 
   apply_to_device
 
-  ensurable do
-    desc "F5 node resource state. Valid values are present, absent."
-
-    defaultto(:present)
-
-    newvalue(:present) do
-      provider.create
-    end
-
-    newvalue(:absent) do
-      provider.destroy
-    end
-  end
+  ensurable
 
   newparam(:name, :namevar=>true) do
     desc "The node name. v9.0 API uses IP addresses, v11.0 API uses names."

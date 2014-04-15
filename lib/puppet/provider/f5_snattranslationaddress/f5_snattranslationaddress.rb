@@ -39,16 +39,6 @@ Puppet::Type.type(:f5_snattranslationaddress).provide(:f5_snattranslationaddress
     end
   end
 
-# def connection_limit
-#   message = { translation_addresses: { item: resource[:name] } }
-#   transport[wsdl].get(:get_connection_limit, message)
-# end
-
-# def connection_limit=(value)
-#   message = { translation_addresses: { item: resource[:name] }, limits: { item: value } }
-#   transport[wsdl].call(:set_connection_limit, message: message)
-# end
-
   def create
     Puppet.debug("Puppet::Provider::F5_SNATTranslationAddress: creating F5 snattranslationaddress #{resource[:name]}")
     message = {

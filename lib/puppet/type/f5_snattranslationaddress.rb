@@ -2,21 +2,7 @@ Puppet::Type.newtype(:f5_snattranslationaddress) do
   @doc = "Manage F5 snat translation address."
 
   apply_to_device
-
-  ensurable do
-    desc "F5 snattranstlationaddress resource state. Valid values are present,
-    absent."
-
-    defaultto(:present)
-
-    newvalue(:present) do
-      provider.create
-    end
-
-    newvalue(:absent) do
-      provider.destroy
-    end
-  end
+  ensurable
 
   newparam(:name, :namevar=>true) do
     desc "The snat translation address name."
