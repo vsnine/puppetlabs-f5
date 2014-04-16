@@ -25,11 +25,18 @@ class Puppet::Util::NetworkDevice::F5::Facts
       'version'
     ].each do |key|
       @facts[key] = @transport[F5_WSDL].call("get_#{key}".to_sym).body["get_#{key}_response".to_sym][:return]
+      if @facts[key].is_a?(Hash)
+        @facts[key] = 0
+      end
     end
 
     system_info = @transport[F5_WSDL].call(:get_system_information).body
-    system_info[:get_system_information_response][:return].each do |key|
-      @facts[key] = system_info[:get_system_information_response][:return][key]
+    system_info[:get_system_information_response][:return].each do |key, value|
+      if key == :"@s:type"
+      elsif value.is_a?(Hash)
+      else
+        @facts[key] = system_info[:get_system_information_response][:return][key]
+      end
     end
 
     # We want to get two kinds of values from get_hardware_information, the
